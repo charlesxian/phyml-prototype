@@ -51,7 +51,7 @@ public class PhyMLController extends NodeController {
     private final String choicesSubstModels = "Dayhoff;LG;WAG;JTT";
     private final AbstractProperty propSubstModels = new ComboBoxProperty(nodeModel, "Substitution models","_Substitution models");
     private final AbstractProperty dummyPropSubstModels = new DummyProperty(nodeModel, "dummyPropSubstModels", null,"_Substitution models");
-    private final AbstractProperty propTsTvVal = new TextFieldProperty(nodeModel,"Ts/tv value","_Ts/Tv");
+    private final AbstractProperty propTsTvVal = new TextFieldProperty(nodeModel,"TsTvValue","Ts/tv value","_Ts/Tv");
     private final AbstractProperty propTsTvYesNo = new RadioButtonProperty(nodeModel,"TsTvEstFix",null,"_Ts/Tv");
 
     private final AbstractProperty propRASmodel = new RadioButtonProperty(nodeModel,"Rate across sites","_Rate across sites");
@@ -142,6 +142,7 @@ public class PhyMLController extends NodeController {
         propFormat.setOption(RadioButtonProperty.OPTION_1, "Interleaved");
         propFormat.setOption(RadioButtonProperty.OPTION_2, "Sequential");
         propFormat.selectValue("Interleaved");
+        propFormat.commandLabel="";
 
         // Substitution model
         propSubstModels.setOption(ComboBoxProperty.OPTION_CHOICES, choicesSubstModels);
@@ -159,7 +160,7 @@ public class PhyMLController extends NodeController {
         propTsTvYesNo.selectValue("estimated");
         state = true;
         propTsTvYesNo.setActive(state);
-        propTsTvYesNo.commandLabel="-t e";
+        propTsTvVal.commandLabel="-t e";
 
 
         // RAS model
@@ -257,8 +258,10 @@ public class PhyMLController extends NodeController {
 
         String idThatChanged = property.getId();
 
+        System.out.println("idThatChanged: "+idThatChanged);
+
         // Input sequence file
-        if("Source".equals(idThatChanged))
+        if("Alignment file".equals(idThatChanged))
             {
                 if("Example".equals(property.getValue()))
                     {
@@ -273,7 +276,17 @@ public class PhyMLController extends NodeController {
             }
 
 
-
+        if("Format".equals(idThatChanged))
+            {
+                if("Interleaved".equals(property.getValue()))
+                    {
+                        propFormat.commandLabel="";
+                    }
+                else
+                    {
+                        propFormat.commandLabel="-q ";
+                    }
+            }
 
         // Substitution models
 
@@ -290,7 +303,8 @@ public class PhyMLController extends NodeController {
                         Boolean state = false;
                         propTsTvVal.setActive(state);
                         propTsTvYesNo.setActive(state);
-                        propTsTvYesNo.commandLabel="";
+                        propTsTvVal.commandLabel="";
+                        propDataType.commandLabel="-d aa";
                     }
                 else
                     {
@@ -302,7 +316,8 @@ public class PhyMLController extends NodeController {
                         propTsTvYesNo.selectValue("estimated");
                         state = false;
                         propTsTvVal.setActive(state);
-                        propTsTvYesNo.commandLabel="-t e";
+                        propTsTvVal.commandLabel="-t e";
+                        propDataType.commandLabel="-d nt";
                     }
             }
 
@@ -326,13 +341,22 @@ public class PhyMLController extends NodeController {
                     {
                         Boolean state = true;
                         propTsTvVal.setActive(state);
+                        propTsTvVal.commandLabel="-t "+propTsTvVal.getValue();
                     }
                 else
                     {
                         Boolean state = false;
                         propTsTvVal.setActive(state);
+                        propTsTvVal.commandLabel="-t e";
                     }
             }
+
+
+        if("TsTvValue".equals(idThatChanged))
+            {
+                propTsTvVal.commandLabel="-t "+propTsTvVal.getValue();                
+            }
+
 
         if("Substitution models".equals(idThatChanged))
             {
@@ -344,20 +368,20 @@ public class PhyMLController extends NodeController {
                         Boolean state = true;
                         propTsTvYesNo.setActive(state);
                         propTsTvYesNo.selectValue("estimated");
+                        propTsTvVal.commandLabel="-t e";
                     }
                 else
                     {
                         Boolean state = false;
                         propTsTvVal.setActive(state);
                         propTsTvYesNo.setActive(state);
+                        propTsTvVal.commandLabel="";
                     }
             }
 
 
 
         // Rate  across sites
-
-        System.out.println(node.getId()+" <> "+property.getValue()+" <> "+propRASnclasses.getValue());
 
         if("Substitution model".equals(node.getId()))
             {
@@ -496,8 +520,9 @@ public class PhyMLController extends NodeController {
         commandLine="";
         commandLine+=propAlignmentYesNo.commandLabel+" ";
         commandLine+=propDataType.commandLabel+" ";
+        commandLine+=propFormat.commandLabel+" ";
         commandLine+=propSubstModels.commandLabel+" ";
-        commandLine+=propTsTvYesNo.commandLabel+" ";
+        commandLine+=propTsTvVal.commandLabel+" ";
         commandLine+=propRASnclasses.commandLabel+" ";
         commandLine+=propRASmodel.commandLabel+" ";
         commandLine+=propTreeSearch.commandLabel+" ";
